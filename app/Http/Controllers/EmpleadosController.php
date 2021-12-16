@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\recoverPass;
 use Illuminate\Http\Request;
 
 class EmpleadosController extends Controller
 {
-    
+    //Registrar empleado
     public function registro(Request $req){
 
         $respuesta = ["status" => 1, "msg" => ""];
@@ -49,7 +51,7 @@ class EmpleadosController extends Controller
         }  
         return response()->json($respuesta);
     }
-
+    //Ver listado de empleados
     public function listado_empleados(Request $request){
 
         $respuesta = ["status" => 1, "msg" => ""];
@@ -77,7 +79,7 @@ class EmpleadosController extends Controller
 
         return response()->json($respuesta);
     }
-
+    //Ver detalle de un empleado
     public function detalle_empleado(Request $request, $id){
 
         $respuesta = ["status" => 1, "msg" => ""];
@@ -131,7 +133,7 @@ class EmpleadosController extends Controller
 
         return response()->json($respuesta);
     }
-
+    //Ver perfil usuario logeado
     public function ver_perfil(Request $request){
 
         $respuesta = ["status" => 1, "msg" => ""];
@@ -146,7 +148,7 @@ class EmpleadosController extends Controller
         }
         return response()->json($respuesta);
     }
-
+    //Modificar datos de un usuario
     public function modificar_datos(Request $request,$id){
 
         $respuesta = ["status" => 1, "msg" => ""];
@@ -198,8 +200,12 @@ class EmpleadosController extends Controller
                     $usuario -> nombre = $datos->nombre;
                     if(isset($datos->email))
                     $usuario -> email = $datos->email;
-                    if(isset($datos->pass))
-                    $usuario -> pass = $datos->pass;
+
+                    if(isset($datos->pass)){
+                    $usuario -> pass = Hash::make($datos->pass);
+                    $usuario -> api_token = null;
+                    }
+
                     if(isset($datos->puesto_trabajo))
                     $usuario -> puesto_trabajo = $datos->puesto_trabajo;
                     if(isset($datos->salario))
@@ -227,7 +233,7 @@ class EmpleadosController extends Controller
 
         return response()->json($respuesta);  
     }
-
+    //Login Usuario
     public function login(Request $req){
 
         $respuesta = ["status" => 1, "msg" => ""];
@@ -237,6 +243,9 @@ class EmpleadosController extends Controller
 
         if ($usuario){
 
+            /*print_r($usuario -> pass);
+            die;*/
+
             if (Hash::check($req->pass, $usuario -> pass)){
 
                 do {
@@ -245,7 +254,7 @@ class EmpleadosController extends Controller
 
                 $usuario -> api_token = $token;
                 $usuario -> save();
-                $respuesta["msg"] = "Login correcto".$usuario -> api_token;  
+                $respuesta["msg"] = "Login correcto, tu api token es: ".$usuario -> api_token;  
 
             } else {
                 $respuesta["status"] = 0;
@@ -261,9 +270,40 @@ class EmpleadosController extends Controller
 
 
     }
+    //Recuperar Contraseña
+    public function recoverPass(Request $req){
 
-    //Recuperar pass
+        $respuesta = ["status" => 1, "msg" => ""];
+        $datos = $req -> getContent();
+        $datos = json_decode($datos); 
+    
+        $email = $datos->email;
+        $usuario = User::where('email', $email) -> first();
 
-    //Mail::to($usuario->email)->send(new Notification($passwordGenerada));
+        if($usuario){
+            
+            $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+            $caracteresLenght = strlen($caracteres);
+            $longitud = 8;
+            $newPassword = "";
+          
+            for($i = 0; $i<$longitud; $i++) {
+               $newPassword .= $caracteres[rand(0, $caracteresLenght -1)];
+            }
+            $usuario->api_token = null;
+            $usuario->pass = Hash::make($newPassword);
+            $usuario -> save();
+            Mail::to($usuario->email)->send(new recoverPass($newPassword));
+            $respuesta["msg"] = "Se ha enviado una contraseña nueva a tu email";  
+
+        } else {
+            $respuesta["status"] = 0;
+            $respuesta["msg"] = "Usuario no encontrado";  
+        }
+
+        return response()->json($respuesta);  
+
+    }
+    
 
 }

@@ -33,7 +33,7 @@ class recoverPass extends Mailable
      */
     public function build()
     {
-        return $this->subject('Solicitud de nueva contraseña')-> view('recoverPassword');
+        return $this->subject('Solicitud de nueva contraseña')-> view('recoverPass')->with($this->pass);;
         //si esta en una carpeta hay que poner un .
     }
 }
