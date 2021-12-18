@@ -15,10 +15,6 @@ use App\Http\Controllers\EmpleadosController;
 |
 */
 
-/*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});*/
-
 Route::middleware(['login-api-token', 'permisos']) -> prefix('usuarios') -> group(function(){
 
     Route::post('/login',[EmpleadosController::class, 'login'])->withoutMiddleware(['login-api-token', 'permisos']);
