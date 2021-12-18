@@ -22,9 +22,9 @@ class VerificarApiToken
         $apiToken = $request -> api_token;
         $usuario = User::where('api_token', $apiToken)->first();
         
-        if(!$usuario){
+        if(!$usuario || empty($apiToken)){
             $respuesta["status"] = 0;
-            $respuesta["msg"] = "Usuario no encontrado";  
+            $respuesta["msg"] = "Usuario no encontrado o api token incorrecta";  
         } else {
             $respuesta["msg"] = "Api token OK";
             $request -> usuario = $usuario;

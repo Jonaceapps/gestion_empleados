@@ -19,22 +19,14 @@ use App\Http\Controllers\EmpleadosController;
     return $request->user();
 });*/
 
-Route::prefix('usuarios')->group(function(){
-    Route::post('/login',[EmpleadosController::class, 'login']);
-    Route::get('/recoverPass',[EmpleadosController::class, 'recoverPass']);
+Route::middleware(['login-api-token', 'permisos']) -> prefix('usuarios') -> group(function(){
+
+    Route::post('/login',[EmpleadosController::class, 'login'])->withoutMiddleware(['login-api-token', 'permisos']);
+    Route::get('/recoverPass',[EmpleadosController::class, 'recoverPass'])->withoutMiddleware(['login-api-token', 'permisos']);
+    Route::get('/listado_empleados',[EmpleadosController::class, 'listado_empleados']);
+    Route::post('/modificar_datos/{id}',[EmpleadosController::class, 'modificar_datos']);
+    Route::put('/registro',[EmpleadosController::class, 'registro']);
+    Route::get('/ver_perfil',[EmpleadosController::class, 'ver_perfil'])->withoutMiddleware('permisos');
+    Route::get('/detalle_empleado/{id}',[EmpleadosController::class, 'detalle_empleado']);
+
 });
-
-Route::middleware(['login-api-token', 'permisos'])->get('/listado_empleados',[EmpleadosController::class, 'listado_empleados']);
-Route::middleware(['login-api-token', 'permisos'])->get('/modificar_datos/{id}',[EmpleadosController::class, 'modificar_datos']);
-Route::middleware(['login-api-token', 'permisos'])->get('/registro',[EmpleadosController::class, 'registro']);
-Route::middleware(['login-api-token'])->get('/ver_perfil',[EmpleadosController::class, 'ver_perfil']);
-Route::middleware(['login-api-token', 'permisos'])->get('/detalle_empleado/{id}',[EmpleadosController::class, 'detalle_empleado']);
-
-    //Route::get('/validar_permisos', function(){}) -> middleware('permisos')
-
-/*Route::middleware('permisos') -> prefix('usuarios2') -> group(function(){
-
-        Route::put('/registro',[EmpleadosController::class, 'registro']);
-
-
-});*/

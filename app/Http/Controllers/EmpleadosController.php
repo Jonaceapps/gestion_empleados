@@ -5,8 +5,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use App\Mail\recoverPass;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 
 class EmpleadosController extends Controller
@@ -243,7 +243,7 @@ class EmpleadosController extends Controller
 
         if ($usuario){
 
-            /*print_r($usuario -> pass);
+            /*print_r($req->email);
             die;*/
 
             if (Hash::check($req->pass, $usuario -> pass)){
