@@ -97,7 +97,7 @@ class EmpleadosController extends Controller
                         $empleado = DB::table('usuarios')
                             ->whereIn('usuarios.puesto_trabajo', ['Empleado', 'RRHH'])
                             ->where('usuarios.id',$usuario->id)
-                            ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario')
+                            ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario','usuarios.email')
                             ->first(); 
                         $respuesta['detalle_empleado'] = $empleado;
                     } else  {
@@ -114,7 +114,7 @@ class EmpleadosController extends Controller
                         $empleado = DB::table('usuarios')
                             ->where('usuarios.puesto_trabajo', 'Empleado')
                             ->where('usuarios.id',$usuario->id)
-                            ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario')
+                            ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario','usuarios.email')
                             ->first();
                         $respuesta['detalle_empleado'] = $empleado;
                     } else {
