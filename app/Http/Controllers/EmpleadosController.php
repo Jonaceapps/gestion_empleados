@@ -320,7 +320,7 @@ class EmpleadosController extends Controller
 
             try {
                 Storage::disk('public')->put($imageName, base64_decode($image));
-                $imageUrl = "http://localhost/gestion_empleados/public/storage/".$imageName;
+                $imageUrl = "https://gestion-empleados-9oh6r.ondigitalocean.app/storage/".$imageName;
                 $usuario->imagen = $imageUrl;
                 $usuario -> save();        
                 $respuesta["msg"] = "Imagen guardada";        
