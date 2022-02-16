@@ -21,7 +21,7 @@ Route::middleware(['login-api-token', 'permisos']) -> prefix('usuarios') -> grou
     Route::post('/recoverPass',[EmpleadosController::class, 'recoverPass'])->withoutMiddleware(['login-api-token', 'permisos']);
     Route::get('/listado_empleados',[EmpleadosController::class, 'listado_empleados']);
     Route::post('/modificar_datos/{id}',[EmpleadosController::class, 'modificar_datos']);
-    Route::put('/registro',[EmpleadosController::class, 'registro']);
+    Route::put('/registro',[EmpleadosController::class, 'registro'])->withoutMiddleware(['login-api-token', 'permisos']);
     Route::get('/ver_perfil',[EmpleadosController::class, 'ver_perfil'])->withoutMiddleware('permisos');
     Route::get('/detalle_empleado/{id}',[EmpleadosController::class, 'detalle_empleado']);
     Route::post('/uploadImage',[EmpleadosController::class, 'uploadImage'])->withoutMiddleware('permisos');
