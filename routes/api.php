@@ -18,11 +18,12 @@ use App\Http\Controllers\EmpleadosController;
 Route::middleware(['login-api-token', 'permisos']) -> prefix('usuarios') -> group(function(){
 
     Route::post('/login',[EmpleadosController::class, 'login'])->withoutMiddleware(['login-api-token', 'permisos']);
-    Route::get('/recoverPass',[EmpleadosController::class, 'recoverPass'])->withoutMiddleware(['login-api-token', 'permisos']);
+    Route::post('/recoverPass',[EmpleadosController::class, 'recoverPass'])->withoutMiddleware(['login-api-token', 'permisos']);
     Route::get('/listado_empleados',[EmpleadosController::class, 'listado_empleados']);
     Route::post('/modificar_datos/{id}',[EmpleadosController::class, 'modificar_datos']);
     Route::put('/registro',[EmpleadosController::class, 'registro']);
     Route::get('/ver_perfil',[EmpleadosController::class, 'ver_perfil'])->withoutMiddleware('permisos');
     Route::get('/detalle_empleado/{id}',[EmpleadosController::class, 'detalle_empleado']);
+    Route::post('/uploadImage',[EmpleadosController::class, 'uploadImage'])->withoutMiddleware('permisos');
 
 });

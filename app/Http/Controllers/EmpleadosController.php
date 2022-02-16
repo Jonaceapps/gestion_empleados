@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +16,20 @@ class EmpleadosController extends Controller
     //Registrar empleado
     public function registro(Request $req){
 
-        $respuesta = ["status" => 1, "msg" => ""];
+        $respuesta = ["status" => 1, "msg" => ""]; 
+        $datos = $req -> getContent();
+        $datos = json_decode($datos); 
+        $usuario = new User();
+        $usuario -> nombre = $datos -> nombre;
+        $usuario -> email = $datos -> email;
+        $usuario -> pass = Hash::make($datos->pass);
+        $usuario -> puesto_trabajo = $datos -> puesto_trabajo;
+        $usuario -> salario = $datos -> salario;
+        $usuario -> biografia = $datos -> biografia;
+
         $validator = Validator::make(json_decode($req->
         getContent(),true), [
-            "nombre" => 'required|max:50',
+            "nombre" => 'required|unique:App\Models\User,nombre|max:50',
             "email" => 'required|email|unique:App\Models\User,email|max:30',
             "pass" => 'required|regex:/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{6,}/',
             "puesto_trabajo" => 'required|in:Direccion,RRHH,Empleado',
@@ -27,29 +39,18 @@ class EmpleadosController extends Controller
 
         if($validator -> fails()){
             $respuesta["status"] = 0;
-            $respuesta["msg"] = $validator->errors(); 
+            $respuesta["msg"] = "".$validator->errors();         
         } else {
-
-            $datos = $req -> getContent();
-            $datos = json_decode($datos); 
-    
-            $usuario = new User();
-            $usuario -> nombre = $datos -> nombre;
-            $usuario -> email = $datos -> email;
-            $usuario -> pass = Hash::make($datos->pass);
-            $usuario -> puesto_trabajo = $datos -> puesto_trabajo;
-            $usuario -> salario = $datos -> salario;
-            $usuario -> biografia = $datos -> biografia;
-
             try {
                 $usuario->save();
-                $respuesta["msg"] = "Usuario Guardado";
-            }catch (\Exception $e) {
+                $respuesta["msg"] = "Registro completado";
+            } catch (\Exception $e) {
                 $respuesta["status"] = 0;
-                $respuesta["msg"] = "Se ha producido un error".$e->getMessage();  
+                $respuesta["msg"] = "Se ha producido un error";  
             }
         }  
         return response()->json($respuesta);
+     
     }
     //Ver listado de empleados
     public function listado_empleados(Request $request){
@@ -60,21 +61,23 @@ class EmpleadosController extends Controller
 
             $empleados = DB::table('usuarios')
                 ->whereIn('usuarios.puesto_trabajo', ['Empleado', 'RRHH'])
-                ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario')
+                ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario', 'usuarios.biografia', 'usuarios.imagen')
                 ->get(); 
            $respuesta['listado_empleados'] = $empleados;
+           $respuesta["msg"] = "Listado obtenido";  
 
         } elseif ($request->usuario->puesto_trabajo == 'RRHH'){
 
             $empleados = DB::table('usuarios')
                 ->where('usuarios.puesto_trabajo', 'Empleado')
-                ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario')
+                ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario', 'usuarios.biografia', 'usuarios.imagen')
                 ->get(); 
             $respuesta['listado_empleados'] = $empleados;
+            $respuesta["msg"] = "Listado obtenido";  
 
         } else {
             $respuesta["status"] = 0;
-            $respuesta["msg"] = "Se ha producido un error";
+            $respuesta["msg"] = "Permisos no validos";
         }
 
         return response()->json($respuesta);
@@ -97,7 +100,7 @@ class EmpleadosController extends Controller
                         $empleado = DB::table('usuarios')
                             ->whereIn('usuarios.puesto_trabajo', ['Empleado', 'RRHH'])
                             ->where('usuarios.id',$usuario->id)
-                            ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario','usuarios.email')
+                            ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario','usuarios.email', 'usuarios.biografia')
                             ->first(); 
                         $respuesta['detalle_empleado'] = $empleado;
                     } else  {
@@ -141,6 +144,7 @@ class EmpleadosController extends Controller
 
         if($perfil){
             $perfil -> makevisible( 'pass');
+            $respuesta['msg'] = "Datos obtenidos";
             $respuesta['datos_perfil'] = $perfil;
         } else {
             $respuesta["status"] = 0;
@@ -188,7 +192,7 @@ class EmpleadosController extends Controller
 
             if($validator -> fails()){
                 $respuesta["status"] = 0;
-                $respuesta["msg"] = $validator->errors();  
+                $respuesta["msg"] = "".$validator->errors();  
             } else {
 
                 if ($editar == true){
@@ -215,7 +219,7 @@ class EmpleadosController extends Controller
         
                     try {
                         $usuario->save();
-                        $respuesta["msg"] = "Cambios realizados.";
+                        $respuesta["msg"] = "Cambios realizados";
                     }catch (\Exception $e) {
                         $respuesta["status"] = 0;
                         $respuesta["msg"] = "Se ha producido un error".$e->getMessage();  
@@ -236,26 +240,23 @@ class EmpleadosController extends Controller
     //Login Usuario
     public function login(Request $req){
 
-        $respuesta = ["status" => 1, "msg" => ""];
-
-        $email = $req->email;
-        $usuario = User::where('email', $email) -> first();
+        $respuesta = ["status" => 1, "msg" => "", "api_token" => ""];     
+        $datos = $req -> getContent();
+        $datos = json_decode($datos); 
+        $email = $datos->email;
+        $pass = $datos->pass;
+        $usuario = User::where('email', $datos->email) -> first();
 
         if ($usuario){
-
-            /*print_r($req->email);
-            die;*/
-
-            if (Hash::check($req->pass, $usuario -> pass)){
-
+            if (Hash::check( $datos->pass, $usuario->pass)){
                 do {
                     $token = Hash::make($usuario->id.now());
                 } while(User::where('api_token', $token) -> first());
 
                 $usuario -> api_token = $token;
                 $usuario -> save();
-                $respuesta["msg"] = "Login correcto, tu api token es: ".$usuario -> api_token;  
-
+                $respuesta["msg"] = "Login correcto";
+                $respuesta["api_token"] = $usuario -> api_token; 
             } else {
                 $respuesta["status"] = 0;
                 $respuesta["msg"] = "La contraseña no es correcta";  
@@ -298,7 +299,40 @@ class EmpleadosController extends Controller
 
         } else {
             $respuesta["status"] = 0;
-            $respuesta["msg"] = "Usuario no encontrado";  
+            $respuesta["msg"] = "Email no encontrado";  
+        }
+
+        return response()->json($respuesta);  
+
+    }
+
+    public function uploadImage(Request $req){
+        $respuesta = ["status" => 1, "msg" => ""];
+        $datos = $req -> getContent();
+        $datos = json_decode($datos); 
+        $usuario = $usuario = User::where('id', $req->usuario->id) -> first();
+        $image = $datos->image;  // your base64 encoded
+
+        if($image && $usuario){
+            $image = str_replace('data:image/jpeg;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(10).'.'.'png';
+
+            try {
+                Storage::disk('public')->put($imageName, base64_decode($image));
+                $imageUrl = "http://localhost/gestion_empleados/public/storage/".$imageName;
+                $usuario->imagen = $imageUrl;
+                $usuario -> save();        
+                $respuesta["msg"] = "Imagen guardada";        
+            } 
+            catch (\Exception $e) {
+                $respuesta["status"] = 0;
+                $respuesta["msg"] = "Se ha producido un error al guardar la imagen";  
+            }
+
+        } else {
+            $respuesta["status"] = 0;
+            $respuesta["msg"] = "Imagen o usuario no encontrado";  
         }
 
         return response()->json($respuesta);  

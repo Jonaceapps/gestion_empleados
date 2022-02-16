@@ -25,7 +25,7 @@ class ValidarPermisoUsuario
             return $next($request);
         } else {
             $respuesta["status"] = 0;
-            $respuesta["msg"] = "Este usuario no tiene los permisos";  
+            $respuesta["msg"] = "Permisos no validos";  
         }
         return response()->json($respuesta);  
     }

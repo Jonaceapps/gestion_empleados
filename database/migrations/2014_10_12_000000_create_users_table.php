@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->enum("puesto_trabajo", ["Direccion", "RRHH", "Empleado"]);
             $table->float('salario');
             $table->string('biografia');
+            $table->string('imagen')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('api_token')->nullable()->unique();
             $table->rememberToken();
