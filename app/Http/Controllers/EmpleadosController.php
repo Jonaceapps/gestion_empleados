@@ -316,7 +316,7 @@ class EmpleadosController extends Controller
         if($image && $usuario){
             $image = str_replace('data:image/jpeg;base64,', '', $image);
             $image = str_replace(' ', '+', $image);
-            $imageName = Str::random(10).'.'.'png';
+            $imageName = Str::random(10).'.'.'jpeg';
 
             try {
                 Storage::disk('public')->put($imageName, base64_decode($image));
