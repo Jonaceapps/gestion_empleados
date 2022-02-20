@@ -64,7 +64,6 @@ class EmpleadosController extends Controller
                 ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario', 'usuarios.biografia', 'usuarios.imagen')
                 ->get(); 
            $respuesta['listado_empleados'] = $empleados;
-           $respuesta['datos_perfil'] = $request->usuario;
            $respuesta["msg"] = "Listado obtenido";  
 
         } elseif ($request->usuario->puesto_trabajo == 'RRHH'){
@@ -74,7 +73,6 @@ class EmpleadosController extends Controller
                 ->select('usuarios.id','usuarios.nombre','usuarios.puesto_trabajo','usuarios.salario', 'usuarios.biografia', 'usuarios.imagen')
                 ->get(); 
             $respuesta['listado_empleados'] = $empleados;
-            $respuesta['datos_perfil'] = $request->usuario;
             $respuesta["msg"] = "Listado obtenido";  
 
         } else {
@@ -259,6 +257,7 @@ class EmpleadosController extends Controller
                 $usuario -> save();
                 $respuesta["msg"] = "Login correcto";
                 $respuesta["api_token"] = $usuario -> api_token; 
+                $respuesta['datos_perfil'] = $usuario;
             } else {
                 $respuesta["status"] = 0;
                 $respuesta["msg"] = "La contraseña no es correcta";  
