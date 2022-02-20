@@ -310,7 +310,7 @@ class EmpleadosController extends Controller
         $respuesta = ["status" => 1, "msg" => ""];
         $datos = $req -> getContent();
         $datos = json_decode($datos); 
-        $usuario = $usuario = User::where('id', $req->usuario->id) -> first();
+        $usuario = User::where('id', $req->usuario->id) -> first();
         $image = $datos->image;  // your base64 encoded
 
         if($image && $usuario){
@@ -320,7 +320,7 @@ class EmpleadosController extends Controller
 
             try {
                 Storage::disk('public')->put($imageName, base64_decode($image));
-                $imageUrl = "https://gestion-empleados-9oh6r.ondigitalocean.app/storage/".$imageName;
+                $imageUrl = "http://localhost/gestion_empleados/public/storage/".$imageName;
                 $usuario->imagen = $imageUrl;
                 $usuario -> save();        
                 $respuesta["msg"] = "Imagen guardada";        
