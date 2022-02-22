@@ -249,12 +249,19 @@ class EmpleadosController extends Controller
 
         if ($usuario){
             if (Hash::check( $datos->pass, $usuario->pass)){
-                do {
-                    $token = Hash::make($usuario->id.now());
-                } while(User::where('api_token', $token) -> first());
+                if (!isset($usuario->api_token)) {
+                    do {
+                        $token = Hash::make($usuario->id.now());
+                    } while(User::where('api_token', $token) -> first());
+                    $usuario -> api_token = $token;
+                    $usuario -> save();
 
-                $usuario -> api_token = $token;
-                $usuario -> save();
+                } else {
+              
+
+                   
+                }
+        
                 $respuesta["msg"] = "Login correcto";
                 $respuesta["api_token"] = $usuario -> api_token; 
                 $respuesta['datos_perfil'] = $usuario;
