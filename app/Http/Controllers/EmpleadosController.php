@@ -255,13 +255,7 @@ class EmpleadosController extends Controller
                     } while(User::where('api_token', $token) -> first());
                     $usuario -> api_token = $token;
                     $usuario -> save();
-
-                } else {
-              
-
-                   
-                }
-        
+                } 
                 $respuesta["msg"] = "Login correcto";
                 $respuesta["api_token"] = $usuario -> api_token; 
                 $respuesta['datos_perfil'] = $usuario;
