@@ -25,5 +25,6 @@ Route::middleware(['login-api-token', 'permisos']) -> prefix('usuarios') -> grou
     Route::get('/ver_perfil',[EmpleadosController::class, 'ver_perfil'])->withoutMiddleware('permisos');
     Route::get('/detalle_empleado/{id}',[EmpleadosController::class, 'detalle_empleado']);
     Route::post('/uploadImage',[EmpleadosController::class, 'uploadImage'])->withoutMiddleware('permisos');
-
+    Route::post('/uploadEmployeeImage/{id}',[EmpleadosController::class, 'uploadEmployeeImage'])->withoutMiddleware('permisos');
+    
 });

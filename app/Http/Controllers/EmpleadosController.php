@@ -37,6 +37,8 @@ class EmpleadosController extends Controller
             "biografia" => 'required|max:100'
         ]);
 
+        echo $caracteres."".$caracteres;
+
         if($validator -> fails()){
             $respuesta["status"] = 0;
             $respuesta["msg"] = "".$validator->errors();         
@@ -281,7 +283,7 @@ class EmpleadosController extends Controller
         $datos = json_decode($datos); 
     
         $email = $datos->email;
-        $usuario = User::where('email', $email) -> first();
+        $usuario = User::where('email', $email) -> first();  
 
         if($usuario){
             
@@ -309,6 +311,39 @@ class EmpleadosController extends Controller
     }
 
     public function uploadImage(Request $req){
+        $respuesta = ["status" => 1, "msg" => ""];
+        $datos = $req -> getContent();
+        $datos = json_decode($datos); 
+        $usuario = User::where('id', $req->usuario->id) -> first();
+        $image = $datos->image;  // your base64 encoded
+
+        if($image && $usuario){
+            $image = str_replace('data:image/jpeg;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = Str::random(10).'.'.'jpeg';
+
+            try {
+                Storage::disk('public')->put($imageName, base64_decode($image));
+                $imageUrl = "http://empleadosapi.jonacedev.com/gestion_empleados/public/storage/".$imageName;
+                $usuario->imagen = $imageUrl;
+                $usuario -> save();        
+                $respuesta["msg"] = "Imagen guardada";        
+            } 
+            catch (\Exception $e) {
+                $respuesta["status"] = 0;
+                $respuesta["msg"] = "Se ha producido un error al guardar la imagen";  
+            }
+
+        } else {
+            $respuesta["status"] = 0;
+            $respuesta["msg"] = "Imagen o usuario no encontrado";  
+        }
+
+        return response()->json($respuesta);  
+
+    }
+
+    public function uploadEmployeeImage(Request $req, $id){
         $respuesta = ["status" => 1, "msg" => ""];
         $datos = $req -> getContent();
         $datos = json_decode($datos); 
