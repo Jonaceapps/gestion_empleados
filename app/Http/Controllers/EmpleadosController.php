@@ -347,7 +347,7 @@ class EmpleadosController extends Controller
         $respuesta = ["status" => 1, "msg" => ""];
         $datos = $req -> getContent();
         $datos = json_decode($datos); 
-        $usuario = User::where('id', $req->usuario->id) -> first();
+        $usuario = User::find($id);
         $image = $datos->image;  // your base64 encoded
 
         if($image && $usuario){
