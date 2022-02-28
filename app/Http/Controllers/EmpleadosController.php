@@ -37,8 +37,6 @@ class EmpleadosController extends Controller
             "biografia" => 'required|max:100'
         ]);
 
-        echo $caracteres."".$caracteres;
-
         if($validator -> fails()){
             $respuesta["status"] = 0;
             $respuesta["msg"] = "".$validator->errors();         
